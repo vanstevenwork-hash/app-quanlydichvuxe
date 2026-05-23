@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoFix - Chăm Sóc Xe Chuyên Nghiệp</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-error-container": "#93000a",
+            "secondary-container": "#fd761a",
+            "outline": "#76777d",
+            "surface-container-lowest": "#ffffff",
+            "primary-container": "#131b2e",
+            "surface-container-high": "#e6e8ea",
+            "on-primary-fixed-variant": "#3f465c",
+            "surface": "#f7f9fb",
+            "surface-bright": "#f7f9fb",
+            "tertiary-fixed-dim": "#b7c8e1",
+            "on-tertiary": "#ffffff",
+            "outline-variant": "#c6c6cd",
+            "on-primary-container": "#7c839b",
+            "error": "#ba1a1a",
+            "on-secondary-fixed": "#341100",
+            "surface-dim": "#d8dadc",
+            "tertiary-container": "#0b1c30",
+            "primary-fixed-dim": "#bec6e0",
+            "on-surface": "#191c1e",
+            "surface-container-low": "#f2f4f6",
+            "secondary-fixed": "#ffdbca",
+            "secondary-fixed-dim": "#ffb690",
+            "surface-container": "#eceef0",
+            "surface-container-highest": "#e0e3e5",
+            "on-primary-fixed": "#131b2e",
+            "secondary": "#9d4300",
+            "tertiary": "#000000",
+            "on-tertiary-fixed-variant": "#38485d",
+            "on-error": "#ffffff",
+            "primary-fixed": "#dae2fd",
+            "tertiary-fixed": "#d3e4fe",
+            "surface-variant": "#e0e3e5",
+            "background": "#f7f9fb",
+            "on-surface-variant": "#45464d",
+            "inverse-primary": "#bec6e0",
+            "on-background": "#191c1e",
+            "on-secondary": "#ffffff",
+            "inverse-surface": "#2d3133",
+            "inverse-on-surface": "#eff1f3",
+            "on-tertiary-container": "#75859d",
+            "error-container": "#ffdad6",
+            "surface-tint": "#565e74",
+            "on-secondary-fixed-variant": "#783200",
+            "primary": "#000000",
+            "on-tertiary-fixed": "#0b1c30",
+            "on-secondary-container": "#5c2400",
+            "on-primary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "24px",
+            "stack-md": "16px",
+            "margin-mobile": "16px",
+            "unit": "8px",
+            "container-max": "1280px",
+            "margin-desktop": "32px",
+            "stack-sm": "8px",
+            "stack-lg": "32px"
+          },
+          "fontFamily": {
+            "headline-md": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-xl": ["Inter"],
+            "label-sm": ["Inter"]
+          },
+          "fontSize": {
+            "headline-md": ["24px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+            "headline-sm": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "headline-lg-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "700" }],
+            "headline-lg": ["32px", { "lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-xl": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-sm": ["11px", { "lineHeight": "1.2", "fontWeight": "500" }]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hero-gradient {
+      background: linear-gradient(135deg, #131b2e 0%, #0b1c30 100%);
+    }
+
+    .card-hover {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 32px rgba(15, 23, 42, 0.12);
+    }
+
+    .soft-shadow {
+      box-shadow: 0px 4px 20px rgba(15, 23, 42, 0.05);
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md antialiased">
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

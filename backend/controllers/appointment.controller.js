@@ -1,0 +1,211 @@
+const Appointment = require('../models/Appointment');
+const Service = require('../models/Service');
+const User = require('../models/User');
+const { sendAppointmentEmail } = require('../services/email.service');
+
+// ============================================
+// ĐẶT LỊCH SỬA CHỮA (Customer)
+// POST /api/appointments
+// ============================================
+exports.createAppointment = async (req, res) => {
+  try {
+    const { serviceId, appointmentDate, appointmentTime, vehicleInfo, notes } = req.body;
+
+    // Kiểm tra dịch vụ tồn tại
+    const service = await Service.findById(serviceId);
+    if (!service) return res.status(404).json({ message: 'Dịch vụ không tồn tại' });
+
+    // Tạo lịch hẹn
+    const appointment = await Appointment.create({
+      customerId: req.user._id,
+      serviceId,
+      appointmentDate,
+      appointmentTime,
+      vehicleInfo,
+      notes,
+      totalPrice: service.price,
+      status: 'pending'
+    });
+
+    // Gửi email thông báo (không chờ kết quả)
+    sendAppointmentEmail(req.user.email, {
+      customerName: req.user.name,
+      serviceName: service.name,
+      date: new Date(appointmentDate).toLocaleDateString('vi-VN'),
+      time: appointmentTime,
+      vehicleInfo,
+      status: 'pending'
+    });
+
+    // Populate để trả về đầy đủ thông tin
+    const populated = await Appointment.findById(appointment._id)
+      .populate('serviceId', 'name price category')
+      .populate('customerId', 'name email phone');
+
+    res.status(201).json({ message: 'Đặt lịch thành công', appointment: populated });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+// ============================================
+// LẤY DANH SÁCH LỊCH HẸN (theo role)
+// GET /api/appointments
+// ============================================
+exports.getAppointments = async (req, res) => {
+  try {
+    const { status, page = 1, limit = 10 } = req.query;
+    const filter = {};
+
+    // Phân quyền: customer chỉ xem của mình, technician xem được phân công
+    if (req.user.role === 'customer') {
+      filter.customerId = req.user._id;
+    } else if (req.user.role === 'technician') {
+      filter.technicianId = req.user._id;
+    }
+    // Admin xem tất cả
+
+    if (status) filter.status = status;
+
+    const total = await Appointment.countDocuments(filter);
+    const appointments = await Appointment.find(filter)
+      .populate('customerId', 'name email phone')
+      .populate('serviceId', 'name price category')
+      .populate('technicianId', 'name phone specialization')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    res.json({
+      appointments,
+      pagination: { total, page: Number(page), pages: Math.ceil(total / limit) }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+// ============================================
+// LẤY CHI TIẾT LỊCH HẸN
+// GET /api/appointments/:id
+// ============================================
+exports.getAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id)
+      .populate('customerId', 'name email phone address')
+      .populate('serviceId', 'name price category duration description')
+      .populate('technicianId', 'name phone specialization');
+
+    if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
+
+    // Customer chỉ xem được của mình
+    if (req.user.role === 'customer' && appointment.customerId._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Không có quyền xem lịch hẹn này' });
+    }
+
+    res.json({ appointment });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+// ============================================
+// CẬP NHẬT TRẠNG THÁI (Technician/Admin)
+// PUT /api/appointments/:id/status
+// ============================================
+exports.updateStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const validStatuses = ['pending', 'confirmed', 'in-progress', 'completed', 'cancelled'];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
+    }
+
+    const updateData = { status };
+    if (status === 'in-progress') {
+      updateData.startedAt = new Date();
+    } else if (status === 'completed') {
+      updateData.completedAt = new Date();
+    }
+
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    ).populate('customerId', 'name email')
+     .populate('serviceId', 'name');
+
+    if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
+
+    // Gửi email khi trạng thái thay đổi
+    sendAppointmentEmail(appointment.customerId.email, {
+      customerName: appointment.customerId.name,
+      serviceName: appointment.serviceId.name,
+      date: new Date(appointment.appointmentDate).toLocaleDateString('vi-VN'),
+      time: appointment.appointmentTime,
+      vehicleInfo: appointment.vehicleInfo,
+      status
+    });
+
+    res.json({ message: 'Cập nhật trạng thái thành công', appointment });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+// ============================================
+// PHÂN CÔNG KỸ THUẬT VIÊN (Admin)
+// PUT /api/appointments/:id/assign
+// ============================================
+exports.assignTechnician = async (req, res) => {
+  try {
+    const { technicianId } = req.body;
+
+    // Kiểm tra kỹ thuật viên tồn tại
+    const technician = await User.findOne({ _id: technicianId, role: 'technician' });
+    if (!technician) return res.status(404).json({ message: 'Kỹ thuật viên không tồn tại' });
+
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { technicianId, status: 'confirmed' },
+      { new: true }
+    ).populate('customerId', 'name email')
+     .populate('serviceId', 'name')
+     .populate('technicianId', 'name phone specialization');
+
+    if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
+
+    res.json({ message: 'Phân công kỹ thuật viên thành công', appointment });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+// ============================================
+// HỦY LỊCH HẸN (Customer/Admin)
+// DELETE /api/appointments/:id
+// ============================================
+exports.cancelAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+    if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
+
+    // Customer chỉ hủy được của mình và khi chưa bắt đầu sửa
+    if (req.user.role === 'customer') {
+      if (appointment.customerId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'Không có quyền hủy lịch hẹn này' });
+      }
+      if (['in-progress', 'completed'].includes(appointment.status)) {
+        return res.status(400).json({ message: 'Không thể hủy lịch hẹn đang/đã hoàn thành' });
+      }
+    }
+
+    appointment.status = 'cancelled';
+    await appointment.save();
+
+    res.json({ message: 'Hủy lịch hẹn thành công' });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};

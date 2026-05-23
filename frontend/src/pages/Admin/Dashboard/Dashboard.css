@@ -1,0 +1,82 @@
+.dashboard-page {}
+.page-title { font-size: 1.5rem; font-weight: 800; color: #1a2332; margin-bottom: 24px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
+.kpi-card {
+  background: #fff; border: 1px solid #e8ecf1; border-radius: 12px;
+  padding: 20px; display: flex; justify-content: space-between; align-items: center;
+}
+.kpi-label { display: block; font-size: 0.82rem; color: #6b7a8d; font-weight: 500; }
+.kpi-value { display: block; font-size: 1.6rem; font-weight: 800; color: #1a2332; margin: 4px 0; }
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-icon {
+  width: 48px; height: 48px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+}
+
+.charts-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+.chart-card { background: #fff; border: 1px solid #e8ecf1; border-radius: 12px; padding: 20px; }
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.chart-header h3 { font-size: 1.05rem; font-weight: 700; color: #1a2332; }
+.chart-year { font-size: 0.88rem; color: #6b7a8d; }
+.chart-body { position: relative; }
+.doughnut-wrap { display: flex; align-items: center; justify-content: center; }
+
+.service-image-card {
+  background: #fff;
+  border: 1px solid #e8ecf1;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.dashboard-service-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.dashboard-service-item {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #edf1f5;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.dashboard-service-item img {
+  width: 78px;
+  height: 58px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #e8ecf1;
+}
+
+.dashboard-service-item strong {
+  display: block;
+  overflow: hidden;
+  color: #1a2332;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-service-item span {
+  display: block;
+  margin-top: 4px;
+  color: #2563eb;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+@media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .dashboard-service-grid { grid-template-columns: 1fr; }
+  .charts-grid { grid-template-columns: 1fr; }
+}
