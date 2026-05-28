@@ -55,11 +55,17 @@ export const serviceAPI = {
 // ========== APPOINTMENT APIs ==========
 export const appointmentAPI = {
   create: (data) => API.post('/appointments', data),
+  createWithImage: (data) => API.post('/appointments', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   getAll: (params) => API.get('/appointments', { params }),
   getById: (id) => API.get(`/appointments/${id}`),
   updateStatus: (id, status) => API.put(`/appointments/${id}/status`, { status }),
   assign: (id, technicianId) => API.put(`/appointments/${id}/assign`, { technicianId }),
   cancel: (id) => API.delete(`/appointments/${id}`),
+};
+
+// ========== PAYMENT APIs ==========
+export const paymentAPI = {
+  createUrl: (appointmentId, bankCode = '') => API.post('/payments/create-url', { appointmentId, bankCode }),
 };
 
 // ========== USER APIs ==========
@@ -77,14 +83,6 @@ export const statsAPI = {
   getByStatus: () => API.get('/stats/appointments-by-status'),
 };
 
-// ========== INVENTORY APIs ==========
-export const inventoryAPI = {
-  getAll: (params) => API.get('/inventory', { params }),
-  getById: (id) => API.get(`/inventory/${id}`),
-  create: (data) => API.post('/inventory', data),
-  update: (id, data) => API.put(`/inventory/${id}`, data),
-  delete: (id) => API.delete(`/inventory/${id}`),
-};
 
 // ========== AI CHAT APIs ==========
 export const aiAPI = {

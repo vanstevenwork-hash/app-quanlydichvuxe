@@ -17,6 +17,7 @@ const ClientLayout = () => {
   const navLinks = [
     { path: '/', label: 'Trang chủ' },
     { path: '/services', label: 'Dịch vụ' },
+    { path: '/diagnostics', label: 'Chẩn đoán AI' },
     { path: '/booking', label: 'Đặt lịch hẹn' },
     { path: '/profile', label: 'Lịch sử sửa chữa' },
     { path: '/contact', label: 'Liên hệ' },

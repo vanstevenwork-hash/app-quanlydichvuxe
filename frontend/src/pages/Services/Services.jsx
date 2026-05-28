@@ -127,7 +127,7 @@ const Services = () => {
                             <span className="font-headline-sm text-secondary font-bold text-xl">{formatPrice(s.price)}</span>
                           </div>
                           <Link to={`/booking?service=${s._id}`}
-                            className="bg-secondary-container hover:bg-secondary text-on-secondary-container hover:text-on-secondary px-5 py-3 rounded-lg font-label-md text-label-md transition-all duration-300 font-bold shadow-sm hover:shadow active:scale-95">
+                            className="booking-action-btn px-5 py-3 rounded-lg font-label-md text-label-md transition-all duration-300 font-bold active:scale-95">
                             Đặt lịch hẹn
                           </Link>
                         </div>

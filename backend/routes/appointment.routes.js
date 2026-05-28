@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { auth, authorize } = require('../middlewares/auth');
+const upload = require('../middlewares/upload');
 const appointmentController = require('../controllers/appointment.controller');
 
 // Customer đặt lịch
-router.post('/', auth, authorize('customer'), appointmentController.createAppointment);
+router.post('/', auth, authorize('customer'), upload.single('vehicleImage'), appointmentController.createAppointment);
 
 // Xem danh sách (mỗi role xem khác nhau)
 router.get('/', auth, appointmentController.getAppointments);

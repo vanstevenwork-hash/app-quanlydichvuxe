@@ -7,10 +7,12 @@ console.log('PORT:', process.env.EMAIL_PORT);
 console.log('USER:', process.env.EMAIL_USER);
 console.log('FROM:', process.env.EMAIL_FROM);
 
+const testRecipient = process.argv[2] || process.env.EMAIL_TEST_TO || process.env.EMAIL_USER;
+
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT),
-  secure: false,
+  secure: Number(process.env.EMAIL_PORT) === 465,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -19,9 +21,9 @@ const transporter = nodemailer.createTransport({
 
 const mailOptions = {
   from: process.env.EMAIL_FROM,
-  to: process.env.EMAIL_USER, // gửi cho chính mình để test
+  to: testRecipient,
   subject: 'AutoFix - Test SMTP Connection',
-  text: 'Kết nối gửi thư tự động (SMTP) hoạt động hoàn hảo!'
+  text: 'Kết nối gửi thư tự động (SMTP) hoạt động. Đây là email test gửi tới người dùng.'
 };
 
 transporter.sendMail(mailOptions, (error, info) => {
@@ -34,6 +36,6 @@ transporter.sendMail(mailOptions, (error, info) => {
   } else {
     console.log('✅ Gửi thử nghiệm THÀNH CÔNG!');
     console.log('Thư phản hồi:', info.response);
-    console.log(`📧 Hãy kiểm tra hòm thư của bạn (${process.env.EMAIL_USER}) để xem email test.`);
+    console.log(`📧 Hãy kiểm tra hòm thư (${testRecipient}) để xem email test.`);
   }
 });

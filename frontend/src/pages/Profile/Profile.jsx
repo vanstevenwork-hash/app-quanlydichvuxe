@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { appointmentAPI } from '../../api';
+import { appointmentAPI, paymentAPI, resolveAssetUrl } from '../../api';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -38,6 +38,15 @@ const Profile = () => {
       toast.success('Đã hủy lịch hẹn');
       fetchAppointments();
     } catch (err) { toast.error('Không thể hủy'); }
+  };
+
+  const handlePayment = async (id) => {
+    try {
+      const res = await paymentAPI.createUrl(id);
+      window.location.href = res.data.paymentUrl;
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Không thể khởi tạo thanh toán');
+    }
   };
 
   const formatPrice = (p) => new Intl.NumberFormat('vi-VN').format(p) + ' ₫';
@@ -91,7 +100,7 @@ const Profile = () => {
           
           <div className="flex-shrink-0 w-full md:w-auto relative z-10 flex flex-col gap-2">
             <Link to="/booking"
-              className="w-full md:w-auto bg-secondary text-on-secondary font-label-md text-label-md px-6 py-3 rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95 hover:bg-on-secondary-container">
+              className="booking-action-btn w-full md:w-auto font-label-md text-label-md px-6 py-3 rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95">
               <span className="material-symbols-outlined">calendar_add_on</span> Đặt lịch mới
             </Link>
           </div>
@@ -135,9 +144,15 @@ const Profile = () => {
                 <div>
                   <div className="flex justify-between items-start mb-4 gap-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0">
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>directions_car</span>
-                      </div>
+                      {a.vehicleInfo?.imageUrl ? (
+                        <div className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden border border-outline-variant/30">
+                          <img src={resolveAssetUrl(a.vehicleInfo.imageUrl)} alt="Car" className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0">
+                          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>directions_car</span>
+                        </div>
+                      )}
                       <div>
                         <h3 className="font-headline-sm text-headline-sm text-on-surface line-clamp-1">{vehicleText}</h3>
                         <p className="font-body-sm text-body-sm text-on-surface-variant">Biển số: {a.vehicleInfo?.licensePlate || 'Chưa cung cấp'}</p>
@@ -182,8 +197,11 @@ const Profile = () => {
                 </div>
 
                 <div className="border-t border-surface-variant pt-4 flex items-center justify-between mt-auto">
-                  <div className="font-headline-sm text-headline-sm text-primary">
-                    {a.serviceId?.price ? formatPrice(a.serviceId.price) : '0 ₫'}
+                  <div className="font-headline-sm text-headline-sm text-primary flex flex-col">
+                    <span>{a.serviceId?.price ? formatPrice(a.serviceId.price) : '0 ₫'}</span>
+                    {a.paymentStatus === 'paid' && (
+                      <span className="text-xs font-normal text-green-600 mt-0.5">Thanh toán ngày: {new Date(a.paymentDate).toLocaleDateString('vi-VN')}</span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     {['pending', 'confirmed'].includes(a.status) && (
@@ -191,6 +209,17 @@ const Profile = () => {
                         className="font-label-md text-label-md text-error border border-error px-4 py-2 rounded-lg hover:bg-error-container transition-colors active:scale-95">
                         Hủy lịch
                       </button>
+                    )}
+                    {(a.status === 'completed' || a.status === 'confirmed') && (!a.paymentStatus || a.paymentStatus === 'unpaid' || a.paymentStatus === 'failed') && (
+                      <button onClick={() => handlePayment(a._id)}
+                        className="font-label-md text-label-md bg-secondary text-on-secondary px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors active:scale-95 flex items-center gap-1 shadow-md">
+                        <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span> Thanh toán ngay
+                      </button>
+                    )}
+                    {a.paymentStatus === 'paid' && (
+                      <span className="font-label-md text-label-md text-green-600 bg-green-50 border border-green-200 px-4 py-2 rounded-lg flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[18px]">verified</span> Đã thanh toán
+                      </span>
                     )}
                   </div>
                 </div>

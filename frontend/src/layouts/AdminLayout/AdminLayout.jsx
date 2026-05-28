@@ -2,7 +2,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   FaCar, FaTachometerAlt, FaCalendarAlt, FaTools,
-  FaUsers, FaUserCog, FaChartBar, FaSignOutAlt, FaBars, FaBox
+  FaUsers, FaUserCog, FaChartBar, FaSignOutAlt, FaBars
 } from 'react-icons/fa';
 import { useState } from 'react';
 import './AdminLayout.css';
@@ -24,7 +24,6 @@ const AdminLayout = () => {
     { path: '/admin/services', icon: <FaTools />, label: 'Dịch vụ' },
     { path: '/admin/customers', icon: <FaUsers />, label: 'Khách hàng' },
     { path: '/admin/technicians', icon: <FaUserCog />, label: 'Kỹ thuật viên' },
-    { path: '/admin/inventory', icon: <FaBox />, label: 'Kho phụ tùng' },
     { path: '/admin/reports', icon: <FaChartBar />, label: 'Báo cáo' },
   ];
 

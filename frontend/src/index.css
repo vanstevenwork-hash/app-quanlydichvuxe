@@ -115,6 +115,28 @@ a, a:hover, a:focus, a:active {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.booking-action-btn {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(249, 115, 22, 0.35) !important;
+  box-shadow: 0 10px 22px rgba(234, 88, 12, 0.24) !important;
+}
+
+.booking-action-btn:hover {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 28px rgba(234, 88, 12, 0.32) !important;
+}
+
+.booking-action-btn:disabled,
+.booking-action-btn[aria-disabled="true"] {
+  background: #cbd5e1 !important;
+  color: #64748b !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+}
+
 /* Glassmorphism card helper */
 .glass-card {
   background: rgba(255, 255, 255, 0.85);

@@ -1,10 +1,18 @@
 const nodemailer = require('nodemailer');
 
-// Tạo transporter để gửi email
-const transporter = nodemailer.createTransport({
+const hasEmailConfig = () => (
+  process.env.EMAIL_HOST &&
+  process.env.EMAIL_PORT &&
+  process.env.EMAIL_USER &&
+  process.env.EMAIL_PASS &&
+  process.env.EMAIL_USER !== 'your_email@gmail.com' &&
+  process.env.EMAIL_PASS !== 'your_app_password'
+);
+
+const createTransporter = () => nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false,
+  port: Number(process.env.EMAIL_PORT),
+  secure: Number(process.env.EMAIL_PORT) === 465,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -16,6 +24,11 @@ const transporter = nodemailer.createTransport({
 // ============================================
 const sendAppointmentEmail = async (customerEmail, appointmentData) => {
   try {
+    if (!hasEmailConfig()) {
+      console.warn('⚠️ Email config chưa được cấu hình đúng, bỏ qua gửi email.');
+      return false;
+    }
+
     const { customerName, serviceName, date, time, vehicleInfo, status } = appointmentData;
 
     const statusText = {
@@ -60,11 +73,14 @@ const sendAppointmentEmail = async (customerEmail, appointmentData) => {
       `
     };
 
+    const transporter = createTransporter();
     await transporter.sendMail(mailOptions);
     console.log(`📧 Email sent to ${customerEmail}`);
+    return true;
   } catch (error) {
     console.error('❌ Email error:', error.message);
     // Không throw error để không ảnh hưởng flow chính
+    return false;
   }
 };
 

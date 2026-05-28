@@ -9,7 +9,17 @@ const { sendAppointmentEmail } = require('../services/email.service');
 // ============================================
 exports.createAppointment = async (req, res) => {
   try {
-    const { serviceId, appointmentDate, appointmentTime, vehicleInfo, notes } = req.body;
+    let { serviceId, appointmentDate, appointmentTime, vehicleInfo, notes } = req.body;
+
+    // Nếu vehicleInfo gửi lên từ FormData dưới dạng chuỗi JSON, parse nó
+    if (typeof vehicleInfo === 'string') {
+      vehicleInfo = JSON.parse(vehicleInfo);
+    }
+
+    // Xử lý lưu ảnh nếu có
+    if (req.file) {
+      vehicleInfo.imageUrl = `/uploads/${req.file.filename}`;
+    }
 
     // Kiểm tra dịch vụ tồn tại
     const service = await Service.findById(serviceId);
@@ -27,8 +37,8 @@ exports.createAppointment = async (req, res) => {
       status: 'pending'
     });
 
-    // Gửi email thông báo (không chờ kết quả)
-    sendAppointmentEmail(req.user.email, {
+    // Gửi email xác nhận về email của tài khoản customer đang đặt lịch.
+    const emailSent = await sendAppointmentEmail(req.user.email, {
       customerName: req.user.name,
       serviceName: service.name,
       date: new Date(appointmentDate).toLocaleDateString('vi-VN'),
@@ -42,7 +52,7 @@ exports.createAppointment = async (req, res) => {
       .populate('serviceId', 'name price category')
       .populate('customerId', 'name email phone');
 
-    res.status(201).json({ message: 'Đặt lịch thành công', appointment: populated });
+    res.status(201).json({ message: 'Đặt lịch thành công', appointment: populated, emailSent });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }

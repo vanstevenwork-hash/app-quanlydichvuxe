@@ -20,6 +20,8 @@ const Booking = () => {
     vehicleInfo: { make: '', model: '', year: '', licensePlate: '' },
     notes: ''
   });
+  const [vehicleImage, setVehicleImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => { serviceAPI.getAll({ limit: 50 }).then(res => setServices(res.data.services)); }, []);
 
@@ -34,6 +36,20 @@ const Booking = () => {
   const dayNames = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
   const monthNames = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.warning('Kích thước ảnh không được vượt quá 5MB');
+        return;
+      }
+      setVehicleImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) { toast.warning('Vui lòng đăng nhập tài khoản trước'); navigate('/login'); return; }
@@ -46,9 +62,24 @@ const Booking = () => {
     }
     setLoading(true);
     try {
-      const res = await appointmentAPI.create(form);
+      const formData = new FormData();
+      formData.append('serviceId', form.serviceId);
+      formData.append('appointmentDate', form.appointmentDate);
+      formData.append('appointmentTime', form.appointmentTime);
+      formData.append('notes', form.notes);
+      formData.append('vehicleInfo', JSON.stringify(form.vehicleInfo));
+      if (vehicleImage) {
+        formData.append('vehicleImage', vehicleImage);
+      }
+
+      const res = await appointmentAPI.createWithImage(formData);
       setBookingRef('#AFX-' + res.data.appointment._id.slice(-4).toUpperCase());
       setShowSuccess(true);
+      if (res.data.emailSent) {
+        toast.success('Email xác nhận đã được gửi về email của bạn');
+      } else {
+        toast.warning('Đặt lịch thành công nhưng email chưa gửi được. Vui lòng kiểm tra cấu hình SMTP.');
+      }
     } catch (err) { toast.error(err.response?.data?.message || 'Đặt lịch thất bại'); }
     setLoading(false);
   };
@@ -63,7 +94,7 @@ const Booking = () => {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
         {/* LEFT - Steps */}
         <div className="col-span-1 lg:col-span-8 space-y-stack-md">
-          
+
           {/* Step 1: Service */}
           <section className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-6 animate-slide-up">
             <div className="flex items-center gap-3 mb-6">
@@ -73,11 +104,10 @@ const Booking = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {services.slice(0, 6).map(s => (
                 <div key={s._id} onClick={() => setForm({ ...form, serviceId: s._id })}
-                  className={`relative p-4 rounded-xl cursor-pointer transition-all duration-300 ${
-                    form.serviceId === s._id
+                  className={`relative p-4 rounded-xl cursor-pointer transition-all duration-300 ${form.serviceId === s._id
                       ? 'border-2 border-secondary bg-secondary/5 shadow-sm'
                       : 'border border-outline-variant/30 hover:border-secondary hover:bg-surface-container-low/20 bg-surface-container-lowest'
-                  }`}>
+                    }`}>
                   {form.serviceId === s._id && (
                     <div className="absolute top-3 right-3 text-secondary animate-[scaleIn_0.2s]">
                       <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
@@ -114,11 +144,10 @@ const Booking = () => {
                 const active = form.appointmentDate === dateStr;
                 return (
                   <button type="button" key={i} onClick={() => setForm({ ...form, appointmentDate: dateStr })}
-                    className={`flex flex-col items-center justify-center min-w-[90px] p-3 rounded-lg transition-all duration-300 cursor-pointer ${
-                      active
+                    className={`flex flex-col items-center justify-center min-w-[90px] p-3 rounded-lg transition-all duration-300 cursor-pointer ${active
                         ? 'border-2 border-secondary bg-secondary-container text-on-secondary shadow-md'
                         : 'border border-outline-variant/30 hover:border-secondary bg-surface hover:bg-surface-container-low/20'
-                    }`}>
+                      }`}>
                     <span className={`font-label-sm text-label-sm uppercase text-[10px] ${active ? 'text-white font-semibold' : 'text-on-surface-variant'}`}>{dayNames[d.getDay()]}</span>
                     <span className={`font-headline-sm text-headline-sm text-2xl font-bold my-1 ${active ? 'text-white' : 'text-on-surface'}`}>{d.getDate()}</span>
                     <span className={`font-label-sm text-label-sm text-[10px] ${active ? 'text-white/80' : 'text-on-surface-variant'}`}>{monthNames[d.getMonth()]}</span>
@@ -130,11 +159,10 @@ const Booking = () => {
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
               {timeSlots.map(t => (
                 <button type="button" key={t} onClick={() => setForm({ ...form, appointmentTime: t })}
-                  className={`py-2.5 rounded-lg font-label-md text-label-md transition-all duration-200 cursor-pointer ${
-                    form.appointmentTime === t
+                  className={`py-2.5 rounded-lg font-label-md text-label-md transition-all duration-200 cursor-pointer ${form.appointmentTime === t
                       ? 'bg-secondary text-on-secondary font-bold shadow-md active:scale-95 border-none'
                       : 'border border-outline-variant/30 text-on-surface hover:border-secondary hover:bg-surface-container-low/30'
-                  }`}>{t}</button>
+                    }`}>{t}</button>
               ))}
             </div>
           </section>
@@ -169,6 +197,24 @@ const Booking = () => {
                 <input type="text" placeholder="Ví dụ: 30K-987.65" value={form.vehicleInfo.licensePlate}
                   onChange={(e) => setForm({ ...form, vehicleInfo: { ...form.vehicleInfo, licensePlate: e.target.value } })}
                   className="w-full rounded-lg border-outline-variant/30 border px-4 py-3 bg-surface-container-low focus:ring-1 focus:ring-secondary focus:border-secondary outline-none text-sm uppercase font-semibold" />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="font-label-md text-label-md text-on-surface mb-1.5 block text-xs font-semibold">Hình ảnh xe (Tùy chọn)</label>
+              <div className="flex items-center justify-center w-full">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-outline-variant/30 border-dashed rounded-lg cursor-pointer bg-surface-container-low hover:bg-surface-container-high overflow-hidden relative">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-on-surface-variant">
+                      <span className="material-symbols-outlined text-3xl mb-2">cloud_upload</span>
+                      <p className="mb-2 text-sm"><span className="font-semibold">Nhấn để tải lên</span> hoặc kéo thả</p>
+                      <p className="text-xs opacity-70">PNG, JPG or GIF (MAX. 5MB)</p>
+                    </div>
+                  )}
+                  <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                </label>
               </div>
             </div>
           </section>
@@ -225,7 +271,7 @@ const Booking = () => {
               <div className="flex items-start gap-4 py-1">
                 <span className="material-symbols-outlined text-secondary text-[20px] mt-0.5">location_on</span>
                 <div>
-                  <p className="font-label-md text-label-md text-on-surface font-bold">Trung tâm dịch vụ AutoPro</p>
+                  <p className="font-label-md text-label-md text-on-surface font-bold">Trung tâm dịch vụ AutoFix</p>
                   <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Số 123 đường Nguyễn Văn Linh, Quận 7, TP. HCM</p>
                 </div>
               </div>
@@ -236,7 +282,7 @@ const Booking = () => {
                 </div>
               </div>
               <button type="submit" disabled={loading}
-                className="w-full py-4 mt-4 rounded-lg bg-secondary hover:bg-on-secondary-container text-on-secondary font-label-md text-label-md flex justify-center items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg active:scale-[0.98] disabled:opacity-60 font-bold cursor-pointer">
+                className="booking-action-btn w-full py-4 mt-4 rounded-lg font-label-md text-label-md flex justify-center items-center gap-2 transition-all duration-300 active:scale-[0.98] font-bold cursor-pointer">
                 <span>{loading ? 'Đang gửi yêu cầu...' : 'Xác nhận đặt lịch'}</span>
                 {!loading && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
               </button>

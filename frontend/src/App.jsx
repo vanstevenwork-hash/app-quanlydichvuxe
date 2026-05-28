@@ -15,6 +15,9 @@ import Booking from './pages/Booking/Booking';
 import Profile from './pages/Profile/Profile';
 import Login from './pages/Login/Login';
 import Contact from './pages/Contact/Contact';
+import Diagnostics from './pages/Diagnostics/Diagnostics';
+import MockGateway from './pages/Payment/MockGateway';
+import PaymentResult from './pages/Payment/PaymentResult';
 
 // Admin Pages
 import Dashboard from './pages/Admin/Dashboard/Dashboard';
@@ -22,7 +25,6 @@ import AdminServices from './pages/Admin/Services/AdminServices';
 import AdminAppointments from './pages/Admin/Appointments/AdminAppointments';
 import AdminTechnicians from './pages/Admin/Technicians/AdminTechnicians';
 import AdminCustomers from './pages/Admin/Customers/AdminCustomers';
-import AdminInventory from './pages/Admin/Inventory/AdminInventory';
 
 // Technician Pages
 import TechnicianSchedule from './pages/Technician/TechnicianSchedule';
@@ -36,6 +38,7 @@ function App() {
           <Route element={<ClientLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/diagnostics" element={<Diagnostics />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/booking" element={
               <ProtectedRoute roles={['customer']}>
@@ -45,6 +48,11 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute roles={['customer']}>
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/payment/result" element={
+              <ProtectedRoute roles={['customer']}>
+                <PaymentResult />
               </ProtectedRoute>
             } />
             <Route path="/technician" element={
@@ -65,9 +73,12 @@ function App() {
             <Route path="/admin/appointments" element={<AdminAppointments />} />
             <Route path="/admin/technicians" element={<AdminTechnicians />} />
             <Route path="/admin/customers" element={<AdminCustomers />} />
-            <Route path="/admin/inventory" element={<AdminInventory />} />
+
             <Route path="/admin/reports" element={<Dashboard />} />
           </Route>
+
+          {/* ====== PUBLIC UTILITY ROUTES ====== */}
+          <Route path="/payment/mock" element={<MockGateway />} />
 
           {/* ====== AUTH ROUTES ====== */}
           <Route path="/login" element={<Login />} />

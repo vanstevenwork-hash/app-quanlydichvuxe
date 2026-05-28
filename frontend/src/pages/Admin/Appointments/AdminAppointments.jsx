@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { appointmentAPI, userAPI } from '../../../api';
+import { appointmentAPI, userAPI, resolveAssetUrl } from '../../../api';
 import { toast } from 'react-toastify';
 import '../Services/AdminServices.css';
 
@@ -74,6 +74,13 @@ const AdminAppointments = () => {
                 <td>
                   <strong>{a.customerId?.name}</strong>
                   <br/><span style={{fontSize: '0.8rem', color: '#6b7a8d'}}>{a.customerId?.phone}</span>
+                  {a.vehicleInfo?.imageUrl && (
+                    <div style={{ marginTop: '4px' }}>
+                      <a href={resolveAssetUrl(a.vehicleInfo.imageUrl)} target="_blank" rel="noreferrer" style={{ fontSize: '0.75rem', color: '#3b82f6', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '2px', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px' }}>
+                        📸 Xem ảnh xe
+                      </a>
+                    </div>
+                  )}
                 </td>
                 <td>{a.serviceId?.name}</td>
                 <td>
@@ -105,6 +112,20 @@ const AdminAppointments = () => {
                   <span className="status-badge" style={{ background: statusMap[a.status]?.color + '20', color: statusMap[a.status]?.color }}>
                     {statusMap[a.status]?.label}
                   </span>
+                  {a.paymentStatus === 'paid' && (
+                    <div style={{ marginTop: '6px' }}>
+                      <span className="status-badge" style={{ background: '#dcfce7', color: '#16a34a', fontSize: '0.75rem', padding: '2px 6px' }}>
+                        $ Đã thanh toán
+                      </span>
+                    </div>
+                  )}
+                  {a.paymentStatus === 'failed' && (
+                    <div style={{ marginTop: '6px' }}>
+                      <span className="status-badge" style={{ background: '#fee2e2', color: '#dc2626', fontSize: '0.75rem', padding: '2px 6px' }}>
+                        ! Thanh toán lỗi
+                      </span>
+                    </div>
+                  )}
                 </td>
                 <td>
                   <select className="status-select" value={a.status}

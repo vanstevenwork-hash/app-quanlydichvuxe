@@ -22,7 +22,7 @@ const Home = () => {
               AutoFix mang đến giải pháp bảo dưỡng và sửa chữa ô tô toàn diện với công nghệ hiện đại và đội ngũ kỹ thuật viên giàu kinh nghiệm.
             </p>
             <div className="pt-stack-sm flex gap-unit">
-              <button onClick={handleBookingClick} className="bg-secondary-container text-on-secondary-container font-headline-sm text-headline-sm rounded px-6 py-3 hover:bg-secondary hover:text-on-secondary hover:shadow-lg transition-all duration-300 font-bold shadow-md active:scale-95 transform hover:-translate-y-0.5">
+              <button onClick={handleBookingClick} className="booking-action-btn font-headline-sm text-headline-sm rounded px-6 py-3 transition-all duration-300 font-bold active:scale-95 transform hover:-translate-y-0.5">
                 Đặt Lịch Ngay
               </button>
               <button onClick={() => navigate('/services')} className="border border-tertiary-fixed-dim text-tertiary-fixed-dim font-headline-sm text-headline-sm rounded px-6 py-3 hover:bg-surface-container-low/10 hover:border-white transition-all duration-300 active:scale-95">

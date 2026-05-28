@@ -35,7 +35,8 @@ const appointmentSchema = new mongoose.Schema({
     make: { type: String, required: true },    // Hãng xe: Toyota
     model: { type: String, required: true },   // Dòng xe: Camry
     year: { type: Number, required: true },     // Năm: 2021
-    licensePlate: { type: String, default: '' } // Biển số: 51F-888.88
+    licensePlate: { type: String, default: '' }, // Biển số: 51F-888.88
+    imageUrl: { type: String, default: '' }     // Ảnh chụp xe
   },
   // Ghi chú tình trạng xe
   notes: {
@@ -53,6 +54,23 @@ const appointmentSchema = new mongoose.Schema({
   totalPrice: {
     type: Number,
     default: 0
+  },
+  // Trạng thái thanh toán
+  paymentStatus: {
+    type: String,
+    enum: ['unpaid', 'processing', 'paid', 'failed', 'refunded'],
+    default: 'unpaid'
+  },
+  // Phương thức thanh toán
+  paymentMethod: {
+    type: String,
+    enum: ['cash', 'vnpay', 'momo', 'transfer'],
+    default: 'cash'
+  },
+  // Ngày giờ thanh toán thành công
+  paymentDate: {
+    type: Date,
+    default: null
   },
   // Thời gian bắt đầu sửa chữa thực tế
   startedAt: {
