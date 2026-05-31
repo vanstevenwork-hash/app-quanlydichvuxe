@@ -17,6 +17,14 @@ const TechnicianSchedule = () => {
   const [appointments, setAppointments] = useState([]);
   const [filter, setFilter] = useState('');
 
+  // States for Evidence Modal
+  const [showEvidenceModal, setShowEvidenceModal] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+  const [evidenceNotes, setEvidenceNotes] = useState('');
+  const [evidenceImages, setEvidenceImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => { fetchAppointments(); }, [filter]);
 
   const fetchAppointments = async () => {
@@ -34,6 +42,52 @@ const TechnicianSchedule = () => {
       toast.success('Cập nhật thành công');
       fetchAppointments();
     } catch (err) { toast.error('Lỗi cập nhật'); }
+  };
+
+  const handleOpenEvidenceModal = (id, existingNotes = '') => {
+    setSelectedAppointmentId(id);
+    setEvidenceNotes(existingNotes);
+    setEvidenceImages([]);
+    setImagePreviews([]);
+    setShowEvidenceModal(true);
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (evidenceImages.length + files.length > 5) {
+      toast.warning('Tối đa 5 ảnh!');
+      return;
+    }
+    
+    const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024); // max 5MB
+    if (validFiles.length < files.length) toast.warning('Có ảnh vượt quá 5MB bị loại bỏ');
+
+    const newPreviews = validFiles.map(file => URL.createObjectURL(file));
+    setEvidenceImages(prev => [...prev, ...validFiles]);
+    setImagePreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const handleRemoveImage = (index) => {
+    setEvidenceImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmitEvidence = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('technicianNotes', evidenceNotes);
+      evidenceImages.forEach(img => formData.append('images', img));
+      
+      await appointmentAPI.uploadEvidence(selectedAppointmentId, formData);
+      toast.success('Lưu bằng chứng thành công!');
+      setShowEvidenceModal(false);
+      fetchAppointments();
+    } catch (err) {
+      toast.error('Có lỗi xảy ra khi lưu bằng chứng');
+    }
+    setIsSubmitting(false);
   };
 
   return (
@@ -76,14 +130,20 @@ const TechnicianSchedule = () => {
                 <td style={{maxWidth:'200px',fontSize:'0.85rem'}}>{a.notes || '—'}</td>
                 <td><span className="status-badge" style={{ background: statusMap[a.status]?.color + '20', color: statusMap[a.status]?.color }}>{statusMap[a.status]?.label}</span></td>
                 <td>
-                  {a.status !== 'completed' && a.status !== 'cancelled' && (
-                    <select value={a.status} onChange={(e) => handleStatusChange(a._id, e.target.value)}
-                      style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #e0e4e8', fontSize: '0.82rem' }}>
-                      <option value="confirmed">Đã xác nhận</option>
-                      <option value="in-progress">Đang sửa</option>
-                      <option value="completed">Hoàn thành</option>
-                    </select>
-                  )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {a.status !== 'completed' && a.status !== 'cancelled' && (
+                      <select value={a.status} onChange={(e) => handleStatusChange(a._id, e.target.value)}
+                        style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #e0e4e8', fontSize: '0.82rem', width: '100%' }}>
+                        <option value="confirmed">Đã xác nhận</option>
+                        <option value="in-progress">Đang sửa</option>
+                        <option value="completed">Hoàn thành</option>
+                      </select>
+                    )}
+                    <button onClick={() => handleOpenEvidenceModal(a._id, a.technicianNotes)}
+                      style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #3b82f6', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '500', width: '100%' }}>
+                      📷 Bằng chứng
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -91,6 +151,43 @@ const TechnicianSchedule = () => {
           </tbody>
         </table>
       </div>
+
+      {showEvidenceModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'white', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '500px' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '16px' }}>Cập nhật bằng chứng sửa chữa</h2>
+            <form onSubmit={handleSubmitEvidence}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '8px' }}>Ghi chú kỹ thuật (Chẩn đoán, lỗi phát hiện, ...)</label>
+                <textarea value={evidenceNotes} onChange={(e) => setEvidenceNotes(e.target.value)} rows={4}
+                  style={{ width: '100%', padding: '10px', border: '1px solid #e0e4e8', borderRadius: '8px', fontSize: '0.875rem', outline: 'none' }} placeholder="Nhập ghi chú chi tiết..."></textarea>
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '8px' }}>Tải lên hình ảnh (Tối đa 5 ảnh mới)</label>
+                <input type="file" multiple accept="image/*" onChange={handleImageChange} style={{ fontSize: '0.875rem', marginBottom: '12px' }} />
+                
+                {imagePreviews.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                    {imagePreviews.map((src, idx) => (
+                      <div key={idx} style={{ position: 'relative', paddingTop: '100%' }}>
+                        <img src={src} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} alt="" />
+                        <button type="button" onClick={() => handleRemoveImage(idx)} style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', cursor: 'pointer' }}>&times;</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+                <button type="button" onClick={() => setShowEvidenceModal(false)} style={{ padding: '8px 16px', border: '1px solid #e0e4e8', background: 'transparent', borderRadius: '8px', cursor: 'pointer' }}>Hủy</button>
+                <button type="submit" disabled={isSubmitting} style={{ padding: '8px 16px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}>
+                  {isSubmitting ? 'Đang lưu...' : 'Lưu bằng chứng'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

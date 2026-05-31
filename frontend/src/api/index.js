@@ -61,6 +61,7 @@ export const appointmentAPI = {
   updateStatus: (id, status) => API.put(`/appointments/${id}/status`, { status }),
   assign: (id, technicianId) => API.put(`/appointments/${id}/assign`, { technicianId }),
   cancel: (id) => API.delete(`/appointments/${id}`),
+  uploadEvidence: (id, formData) => API.put(`/appointments/${id}/evidence`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 // ========== PAYMENT APIs ==========

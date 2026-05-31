@@ -1,8 +1,26 @@
 const Appointment = require('../models/Appointment');
 const crypto = require('crypto');
+const moment = require('moment');
+const qs = require('qs');
+
+function sortObject(obj) {
+  let sorted = {};
+  let str = [];
+  let key;
+  for (key in obj){
+    if (obj.hasOwnProperty(key)) {
+      str.push(encodeURIComponent(key));
+    }
+  }
+  str.sort();
+  for (key = 0; key < str.length; key++) {
+    sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, "+");
+  }
+  return sorted;
+}
 
 // ============================================
-// KHỞI TẠO URL THANH TOÁN (MOCK VNPAY)
+// KHỞI TẠO URL THANH TOÁN (VNPAY REAL)
 // POST /api/payments/create-url
 // ============================================
 exports.createPaymentUrl = async (req, res) => {
@@ -22,34 +40,78 @@ exports.createPaymentUrl = async (req, res) => {
 
     // Cập nhật trạng thái thanh toán thành processing
     appointment.paymentStatus = 'processing';
-    appointment.paymentMethod = 'vnpay'; // Giả lập chọn VNPay
+    appointment.paymentMethod = 'vnpay'; 
     await appointment.save();
 
-    // Giả lập mã hóa bảo mật (như VNPay yêu cầu hash VNP_SECURE_SECRET)
-    // Ở đây ta tạo một chữ ký đơn giản để chống giả mạo
-    const secret = process.env.JWT_SECRET || 'autofix_secret';
-    const amount = appointment.totalPrice || 0;
-    const rawSignature = `appId=${appointment._id}&amount=${amount}&secret=${secret}`;
-    const secureHash = crypto.createHash('sha256').update(rawSignature).digest('hex');
+    // Các tham số cấu hình VNPay
+    const tmnCode = process.env.VNP_TMN_CODE || 'UP292I8A';
+    const secretKey = process.env.VNP_HASH_SECRET || '6XEMFCS5OTER1JLAVHKWAZD9B78383KR';
+    let vnpUrl = process.env.VNP_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
+    const returnUrl = process.env.VNP_RETURN_URL || 'http://localhost:5173/payment/result'; // Đẩy thẳng về kết quả frontend (hoặc đẩy qua backend rồi redirect)
 
-    // Tạo URL giả lập hướng về trang MockGateway của frontend
-    // Trong thực tế, URL này sẽ trỏ về https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const paymentUrl = `${frontendUrl}/payment/mock?appId=${appointment._id}&amount=${amount}&hash=${secureHash}`;
+    // Chúng ta sẽ đẩy returnUrl về API backend để backend xử lý checksum, sau đó redirect sang frontend
+    const backendReturnUrl = (process.env.BACKEND_URL || 'http://localhost:5005') + '/api/payments/callback';
 
-    res.json({ paymentUrl });
+    const date = new Date();
+    const createDate = moment(date).format('YYYYMMDDHHmmss');
+    const ipAddr = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || '127.0.0.1';
+    
+    // Đảm bảo amount là số nguyên (nhân 100 theo chuẩn VNPay)
+    const amount = (appointment.totalPrice || 0) * 100;
+
+    let vnp_Params = {};
+    vnp_Params['vnp_Version'] = '2.1.0';
+    vnp_Params['vnp_Command'] = 'pay';
+    vnp_Params['vnp_TmnCode'] = tmnCode;
+    vnp_Params['vnp_Locale'] = 'vn';
+    vnp_Params['vnp_CurrCode'] = 'VND';
+    vnp_Params['vnp_TxnRef'] = appointment._id.toString();
+    vnp_Params['vnp_OrderInfo'] = 'Thanh toan don hang ' + appointment._id;
+    vnp_Params['vnp_OrderType'] = 'other';
+    vnp_Params['vnp_Amount'] = amount;
+    vnp_Params['vnp_ReturnUrl'] = backendReturnUrl;
+    vnp_Params['vnp_IpAddr'] = ipAddr;
+    vnp_Params['vnp_CreateDate'] = createDate;
+    if(bankCode && bankCode !== '') {
+        vnp_Params['vnp_BankCode'] = bankCode;
+    }
+
+    vnp_Params = sortObject(vnp_Params);
+
+    const signData = qs.stringify(vnp_Params, { encode: false });
+    const hmac = crypto.createHmac("sha512", secretKey);
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex"); 
+    
+    vnp_Params['vnp_SecureHash'] = signed;
+    vnpUrl += '?' + qs.stringify(vnp_Params, { encode: false });
+
+    res.json({ paymentUrl: vnpUrl });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Lỗi server khi tạo URL thanh toán', error: error.message });
   }
 };
 
 // ============================================
-// CALLBACK NHẬN KẾT QUẢ TỪ CỔNG THANH TOÁN
+// CALLBACK NHẬN KẾT QUẢ TỪ CỔNG THANH TOÁN (VNP_RETURN_URL)
 // GET /api/payments/callback
 // ============================================
 exports.paymentCallback = async (req, res) => {
   try {
-    const { appId, status, hash } = req.query;
+    let vnp_Params = req.query;
+    const secureHash = vnp_Params['vnp_SecureHash'];
+    const appId = vnp_Params['vnp_TxnRef'];
+
+    delete vnp_Params['vnp_SecureHash'];
+    delete vnp_Params['vnp_SecureHashType'];
+
+    vnp_Params = sortObject(vnp_Params);
+
+    const secretKey = process.env.VNP_HASH_SECRET || '6XEMFCS5OTER1JLAVHKWAZD9B78383KR';
+    const signData = qs.stringify(vnp_Params, { encode: false });
+    const hmac = crypto.createHmac("sha512", secretKey);
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");     
+
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
     // 1. Tìm đơn hàng
@@ -58,27 +120,23 @@ exports.paymentCallback = async (req, res) => {
       return res.redirect(`${frontendUrl}/payment/result?status=failed&msg=not_found`);
     }
 
-    // 2. Xác thực chữ ký (Checksum)
-    const secret = process.env.JWT_SECRET || 'autofix_secret';
-    const amount = appointment.totalPrice || 0;
-    const rawSignature = `appId=${appId}&amount=${amount}&secret=${secret}`;
-    const secureHash = crypto.createHash('sha256').update(rawSignature).digest('hex');
-
-    if (hash !== secureHash) {
-      return res.redirect(`${frontendUrl}/payment/result?status=failed&msg=invalid_signature`);
-    }
-
-    // 3. Cập nhật trạng thái
-    if (status === '00') {
-      // 00 là mã thành công chuẩn của VNPay
-      appointment.paymentStatus = 'paid';
-      appointment.paymentDate = new Date();
-      await appointment.save();
-      return res.redirect(`${frontendUrl}/payment/result?status=success&appId=${appId}`);
+    if(secureHash === signed){
+      // Chữ ký hợp lệ
+      if (vnp_Params['vnp_ResponseCode'] === '00') {
+        // Thanh toán thành công
+        appointment.paymentStatus = 'paid';
+        appointment.paymentDate = new Date();
+        await appointment.save();
+        return res.redirect(`${frontendUrl}/payment/result?status=success&appId=${appId}`);
+      } else {
+        // Giao dịch không thành công
+        appointment.paymentStatus = 'failed';
+        await appointment.save();
+        return res.redirect(`${frontendUrl}/payment/result?status=failed&appId=${appId}&msg=vnpay_error_${vnp_Params['vnp_ResponseCode']}`);
+      }
     } else {
-      appointment.paymentStatus = 'failed';
-      await appointment.save();
-      return res.redirect(`${frontendUrl}/payment/result?status=failed&appId=${appId}`);
+      // Chữ ký không hợp lệ (Bị can thiệp dữ liệu)
+      return res.redirect(`${frontendUrl}/payment/result?status=failed&appId=${appId}&msg=invalid_signature`);
     }
   } catch (error) {
     console.error('Payment callback error:', error);

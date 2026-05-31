@@ -40,11 +40,7 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/diagnostics" element={<Diagnostics />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/booking" element={
-              <ProtectedRoute roles={['customer']}>
-                <Booking />
-              </ProtectedRoute>
-            } />
+            <Route path="/booking" element={<Booking />} />
             <Route path="/profile" element={
               <ProtectedRoute roles={['customer']}>
                 <Profile />

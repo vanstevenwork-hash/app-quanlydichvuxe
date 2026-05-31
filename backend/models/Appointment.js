@@ -44,6 +44,17 @@ const appointmentSchema = new mongoose.Schema({
     maxlength: [500, 'Ghi chú không quá 500 ký tự'],
     default: ''
   },
+  // Ghi chú của Kỹ thuật viên (Kết luận/Báo cáo)
+  technicianNotes: {
+    type: String,
+    maxlength: [1000, 'Ghi chú kỹ thuật không quá 1000 ký tự'],
+    default: ''
+  },
+  // Hình ảnh bằng chứng do KTV tải lên
+  evidenceImages: {
+    type: [String],
+    default: []
+  },
   // Trạng thái lịch hẹn
   status: {
     type: String,

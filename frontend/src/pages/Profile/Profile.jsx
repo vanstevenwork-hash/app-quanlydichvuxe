@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { appointmentAPI, paymentAPI, resolveAssetUrl } from '../../api';
+import { generateInvoicePDF } from '../../utils/pdfGenerator';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -17,6 +18,10 @@ const Profile = () => {
   const [appointments, setAppointments] = useState([]);
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(true);
+
+  // Xem bằng chứng
+  const [showEvidenceViewer, setShowEvidenceViewer] = useState(false);
+  const [selectedEvidence, setSelectedEvidence] = useState(null);
 
   useEffect(() => { fetchAppointments(); }, [filter]);
 
@@ -193,6 +198,15 @@ const Profile = () => {
                         <span className="text-on-surface font-semibold">{a.technicianId.name}</span>
                       </div>
                     )}
+                    {(a.technicianNotes || (a.evidenceImages && a.evidenceImages.length > 0)) && (
+                      <div className="mt-2 text-right">
+                        <button onClick={() => { setSelectedEvidence(a); setShowEvidenceViewer(true); }}
+                          className="font-label-sm text-label-sm text-primary hover:text-secondary underline underline-offset-2 transition-colors">
+                          <span className="material-symbols-outlined text-[14px] align-middle mr-1">plumbing</span>
+                          Xem báo cáo kỹ thuật
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -221,6 +235,12 @@ const Profile = () => {
                         <span className="material-symbols-outlined text-[18px]">verified</span> Đã thanh toán
                       </span>
                     )}
+                    {(a.paymentStatus === 'paid' || a.status === 'completed') && (
+                      <button onClick={() => generateInvoicePDF(a)}
+                        className="font-label-md text-label-md bg-surface-container hover:bg-surface-container-high text-primary px-4 py-2 rounded-lg transition-colors active:scale-95 flex items-center gap-1 shadow-sm border border-outline-variant/30 ml-2">
+                        <span className="material-symbols-outlined text-[18px]">download</span> Hóa đơn PDF
+                      </button>
+                    )}
                   </div>
                 </div>
                 
@@ -233,6 +253,57 @@ const Profile = () => {
               Chưa có lịch sửa chữa hoặc bảo dưỡng nào
             </div>
           )}
+        </div>
+      )}
+
+      {/* Evidence Viewer Modal */}
+      {showEvidenceViewer && selectedEvidence && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowEvidenceViewer(false)}></div>
+          <div className="relative bg-surface rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-scale-in flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-4 md:p-6 border-b border-outline-variant/30">
+              <h2 className="font-headline-sm text-primary font-bold flex items-center gap-2">
+                <span className="material-symbols-outlined text-secondary">build_circle</span>
+                Báo Cáo Kỹ Thuật
+              </h2>
+              <button onClick={() => setShowEvidenceViewer(false)} className="text-on-surface-variant hover:text-error transition-colors p-1 rounded-full hover:bg-surface-container">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <div className="p-4 md:p-6 overflow-y-auto">
+              <div className="mb-6">
+                <h3 className="font-label-md text-label-md font-bold mb-2 text-on-surface uppercase tracking-wider text-xs">Ghi chú từ kỹ thuật viên</h3>
+                <div className="bg-surface-container-low p-4 rounded-lg border border-outline-variant/30 text-on-surface-variant font-body-sm text-sm whitespace-pre-wrap leading-relaxed">
+                  {selectedEvidence.technicianNotes || 'Không có ghi chú nào.'}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-label-md text-label-md font-bold mb-3 text-on-surface uppercase tracking-wider text-xs">Hình ảnh bằng chứng</h3>
+                {selectedEvidence.evidenceImages && selectedEvidence.evidenceImages.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {selectedEvidence.evidenceImages.map((img, idx) => (
+                      <a key={idx} href={resolveAssetUrl(img)} target="_blank" rel="noreferrer" className="block relative pt-[100%] rounded-lg overflow-hidden border border-outline-variant/30 group shadow-sm hover:shadow-md transition-shadow">
+                        <img src={resolveAssetUrl(img)} alt={`Evidence ${idx + 1}`} className="absolute top-0 left-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                          <span className="material-symbols-outlined text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">zoom_in</span>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-on-surface-variant text-sm italic">Không có hình ảnh đính kèm.</p>
+                )}
+              </div>
+            </div>
+            
+            <div className="p-4 md:p-6 border-t border-outline-variant/30 bg-surface-container-lowest flex justify-end">
+              <button onClick={() => setShowEvidenceViewer(false)} className="px-6 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md rounded-lg transition-colors font-medium">
+                Đóng
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

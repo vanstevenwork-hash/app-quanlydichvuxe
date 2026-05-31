@@ -24,7 +24,7 @@ const AdminLayout = () => {
     { path: '/admin/services', icon: <FaTools />, label: 'Dịch vụ' },
     { path: '/admin/customers', icon: <FaUsers />, label: 'Khách hàng' },
     { path: '/admin/technicians', icon: <FaUserCog />, label: 'Kỹ thuật viên' },
-    { path: '/admin/reports', icon: <FaChartBar />, label: 'Báo cáo' },
+
   ];
 
   return (

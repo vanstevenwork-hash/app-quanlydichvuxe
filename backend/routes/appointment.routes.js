@@ -22,4 +22,7 @@ router.put('/:id/assign', auth, authorize('admin'), appointmentController.assign
 // Hủy lịch (Customer & Admin)
 router.delete('/:id', auth, authorize('customer', 'admin'), appointmentController.cancelAppointment);
 
+// Cập nhật bằng chứng sửa chữa (Technician & Admin)
+router.put('/:id/evidence', auth, authorize('technician', 'admin'), upload.array('images', 5), appointmentController.uploadEvidence);
+
 module.exports = router;

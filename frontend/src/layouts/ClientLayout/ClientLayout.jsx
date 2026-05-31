@@ -14,14 +14,38 @@ const ClientLayout = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const navLinks = [
-    { path: '/', label: 'Trang chủ' },
-    { path: '/services', label: 'Dịch vụ' },
-    { path: '/diagnostics', label: 'Chẩn đoán AI' },
-    { path: '/booking', label: 'Đặt lịch hẹn' },
-    { path: '/profile', label: 'Lịch sử sửa chữa' },
-    { path: '/contact', label: 'Liên hệ' },
-  ];
+  const getNavLinks = () => {
+    if (user?.role === 'admin') {
+      return [
+        { path: '/', label: 'Trang chủ' },
+        { path: '/admin', label: 'Quản trị (Admin)' }
+      ];
+    }
+
+    if (user?.role === 'technician') {
+      return [
+        { path: '/', label: 'Trang chủ' },
+        { path: '/technician', label: 'Lịch làm việc' }
+      ];
+    }
+
+    // Dành cho Customer và Guest
+    const links = [
+      { path: '/', label: 'Trang chủ' },
+      { path: '/services', label: 'Dịch vụ' },
+      { path: '/diagnostics', label: 'Chẩn đoán AI' },
+      { path: '/booking', label: 'Đặt lịch hẹn' }
+    ];
+
+    if (user) {
+      links.push({ path: '/profile', label: 'Hồ sơ của tôi' });
+    }
+    
+    links.push({ path: '/contact', label: 'Liên hệ' });
+    return links;
+  };
+
+  const navLinks = getNavLinks();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -43,12 +67,12 @@ const ClientLayout = () => {
           <nav className="hidden md:flex gap-8 items-center font-body-md text-body-md">
             {navLinks.map(link => (
               <Link key={link.path} to={link.path}
-                className={`font-body-md text-body-md transition-all duration-300 relative py-2 font-semibold group hover:text-secondary ${isActive(link.path)
-                    ? 'text-secondary'
+                className={`font-body-md text-body-md transition-all duration-300 relative py-2 font-semibold group hover:text-orange-500 ${isActive(link.path)
+                    ? 'text-orange-500'
                     : 'text-on-surface-variant'
                   }`}>
                 {link.label}
-                <span className={`absolute bottom-[-6px] left-0 h-[3px] rounded-full bg-secondary transition-all duration-300 ${isActive(link.path) ? 'w-full' : 'w-0 group-hover:w-full'
+                <span className={`absolute bottom-[-6px] left-0 h-[3px] rounded-full bg-orange-500 transition-all duration-300 ${isActive(link.path) ? 'w-full' : 'w-0 group-hover:w-full'
                   }`}></span>
               </Link>
             ))}
@@ -97,7 +121,7 @@ const ClientLayout = () => {
           <div className="md:hidden bg-surface border-t border-outline-variant/30 px-gutter pb-4 shadow-md absolute w-full left-0 top-20 animate-slide-down">
             {navLinks.map(link => (
               <Link key={link.path} to={link.path} onClick={() => setMenuOpen(false)}
-                className={`block py-3 font-body-md text-body-md transition-colors ${isActive(link.path) ? 'text-secondary font-bold' : 'text-on-surface-variant hover:text-secondary'}`}>
+                className={`block py-3 font-body-md text-body-md transition-colors ${isActive(link.path) ? 'text-orange-500 font-bold' : 'text-on-surface-variant hover:text-orange-500'}`}>
                 {link.label}
               </Link>
             ))}

@@ -64,7 +64,7 @@ exports.createAppointment = async (req, res) => {
 // ============================================
 exports.getAppointments = async (req, res) => {
   try {
-    const { status, page = 1, limit = 10 } = req.query;
+    const { status, page = 1, limit = 10, customerId } = req.query;
     const filter = {};
 
     // Phân quyền: customer chỉ xem của mình, technician xem được phân công
@@ -72,8 +72,9 @@ exports.getAppointments = async (req, res) => {
       filter.customerId = req.user._id;
     } else if (req.user.role === 'technician') {
       filter.technicianId = req.user._id;
+    } else if (req.user.role === 'admin' && customerId) {
+      filter.customerId = customerId;
     }
-    // Admin xem tất cả
 
     if (status) filter.status = status;
 
@@ -215,6 +216,48 @@ exports.cancelAppointment = async (req, res) => {
     await appointment.save();
 
     res.json({ message: 'Hủy lịch hẹn thành công' });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+// ============================================
+// CẬP NHẬT BẰNG CHỨNG (Technician)
+// PUT /api/appointments/:id/evidence
+// ============================================
+exports.uploadEvidence = async (req, res) => {
+  try {
+    const { technicianNotes } = req.body;
+    
+    // Tạo mảng đường dẫn ảnh từ file upload
+    const uploadedImages = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+
+    const updateData = {};
+    if (technicianNotes !== undefined) {
+      updateData.technicianNotes = technicianNotes;
+    }
+    
+    if (uploadedImages.length > 0) {
+      // Append ảnh mới vào ảnh cũ hoặc tạo mới nếu chưa có
+      updateData.$push = { evidenceImages: { $each: uploadedImages } };
+    }
+
+    const appointment = await Appointment.findById(req.params.id);
+    
+    if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
+    
+    // Đảm bảo chỉ technician được phân công hoặc admin mới được cập nhật
+    if (req.user.role === 'technician' && appointment.technicianId?.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Bạn không có quyền cập nhật bằng chứng cho đơn này' });
+    }
+
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      uploadedImages.length > 0 ? updateData : { $set: updateData },
+      { new: true }
+    );
+
+    res.json({ message: 'Cập nhật bằng chứng thành công', appointment: updatedAppointment });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
