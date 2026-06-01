@@ -41,6 +41,8 @@ export const authAPI = {
   login: (data) => API.post('/auth/login', data),
   getMe: () => API.get('/auth/me'),
   changePassword: (data) => API.put('/auth/change-password', data),
+  forgotPassword: (data) => API.post('/auth/forgot-password', data),
+  resetPassword: (token, data) => API.put(`/auth/reset-password/${token}`, data),
 };
 
 // ========== SERVICE APIs ==========

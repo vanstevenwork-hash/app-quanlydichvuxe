@@ -22,5 +22,7 @@ router.post('/register', registerValidation, authController.register);
 router.post('/login', loginValidation, authController.login);
 router.get('/me', auth, authController.getMe);
 router.put('/change-password', auth, authController.changePassword);
+router.post('/forgot-password', authController.forgotPassword);
+router.put('/reset-password/:token', authController.resetPassword);
 
 module.exports = router;

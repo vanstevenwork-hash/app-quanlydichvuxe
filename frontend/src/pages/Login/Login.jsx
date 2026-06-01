@@ -6,10 +6,11 @@ import { toast } from 'react-toastify';
 const Login = () => {
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' });
   const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth();
+  const { login, register, forgotPassword } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +23,24 @@ const Login = () => {
   }, [searchParams]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!form.email) {
+      toast.warning('Vui lòng nhập email của bạn');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      await forgotPassword(form.email);
+      toast.success('Liên kết đặt lại mật khẩu đã được gửi đến email của bạn!');
+      setIsForgotPassword(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
+    }
+    setLoading(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,12 +75,12 @@ const Login = () => {
   return (
     <main className="flex-grow flex flex-col md:flex-row w-full max-w-container-max mx-auto min-h-[calc(100vh-80px)] bg-background">
       {/* LEFT SIDEBAR - premium image and text */}
-      <div className="hidden md:block w-1/2 relative bg-primary-container overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-container/80 to-transparent z-10"></div>
-        <img alt="Premium Auto Service Garage" className="w-full h-full object-cover relative z-0 mix-blend-multiply opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjBCmzT1r5Jr5wk29hQ3qOB4Sq0-UfAHPPbcrGv5nicpz9kAgm3XmweBowQpjXFRmnQBVLg3gft9QwzsLJaUPlYPQHWq4aPDxxyaR6sD2V6XgljRmZ99jbxMXthTX6GsZ77WE-m29rsqiy3TbySxo-kkO_zO88InLGNgWrWk3GV4DLCUXihE2txNhRA2qh3MJepz_XXjuBmOKYQ4J3R5GI4rEZ-w2lGwTcH6uMIiKXY3q9GOOr4_Y2S7gBzEysGhGegytxUQ2gGgM" />
-        <div className="absolute bottom-16 left-12 z-20 text-on-primary max-w-md">
-          <h2 className="font-headline-xl text-headline-xl text-on-primary mb-stack-md">Chuyên Gia Chăm Sóc Xe Của Bạn.</h2>
-          <p className="font-body-lg text-body-lg opacity-90">Tham gia hệ thống AutoFix để quản lý lịch sử bảo dưỡng, theo dõi tiến độ sửa chữa và nhận ưu đãi độc quyền.</p>
+      <div className="hidden md:block w-1/2 relative bg-surface-container overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 z-10"></div>
+        <img alt="Premium Auto Service Garage" className="w-full h-full object-cover relative z-0" src="https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&q=80&w=1200" />
+        <div className="absolute bottom-16 left-12 z-20 text-white max-w-md">
+          <h2 className="font-headline-xl text-headline-xl text-white mb-stack-md drop-shadow-lg font-bold">Chuyên Gia Chăm Sóc Xe Của Bạn.</h2>
+          <p className="font-body-lg text-body-lg text-gray-200 drop-shadow-md">Tham gia hệ thống AutoFix để quản lý lịch sử bảo dưỡng, theo dõi tiến độ sửa chữa và nhận ưu đãi độc quyền.</p>
         </div>
       </div>
 
@@ -80,17 +99,47 @@ const Login = () => {
           </button>
 
           <div className="flex border-b border-surface-container mb-8">
-            <button type="button" className={`flex-1 pb-4 font-headline-sm text-headline-sm transition-colors text-center ${isLogin ? 'text-secondary-container border-b-2 border-secondary-container' : 'text-on-surface-variant border-b-2 border-transparent hover:text-on-surface'
-              }`} onClick={() => setIsLogin(true)}>
+            <button type="button" className={`flex-1 pb-4 font-headline-sm text-headline-sm transition-colors text-center ${isLogin && !isForgotPassword ? 'text-secondary-container border-b-2 border-secondary-container' : 'text-on-surface-variant border-b-2 border-transparent hover:text-on-surface'
+              }`} onClick={() => { setIsLogin(true); setIsForgotPassword(false); }}>
               Đăng nhập
             </button>
-            <button type="button" className={`flex-1 pb-4 font-headline-sm text-headline-sm transition-colors text-center ${!isLogin ? 'text-secondary-container border-b-2 border-secondary-container' : 'text-on-surface-variant border-b-2 border-transparent hover:text-on-surface'
-              }`} onClick={() => setIsLogin(false)}>
+            <button type="button" className={`flex-1 pb-4 font-headline-sm text-headline-sm transition-colors text-center ${!isLogin && !isForgotPassword ? 'text-secondary-container border-b-2 border-secondary-container' : 'text-on-surface-variant border-b-2 border-transparent hover:text-on-surface'
+              }`} onClick={() => { setIsLogin(false); setIsForgotPassword(false); }}>
               Đăng ký
             </button>
           </div>
 
-          {isLogin ? (
+          {isForgotPassword ? (
+            <div className="block animate-[fadeIn_0.3s]">
+              <div className="mb-6">
+                <h3 className="font-headline-md text-headline-md font-bold mb-2 text-on-surface">Quên mật khẩu?</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant">Nhập email của bạn và chúng tôi sẽ gửi cho bạn một liên kết để đặt lại mật khẩu.</p>
+              </div>
+              
+              <form onSubmit={handleForgotPassword} className="flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
+                  <label className="font-label-md text-label-md text-on-surface" htmlFor="forgot-email">Email</label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">mail</span>
+                    <input className="h-12 w-full bg-surface-container-low rounded-lg pl-11 pr-4 border border-transparent focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition-all font-body-md text-body-md"
+                      id="forgot-email" name="email" type="email" placeholder="Nhập địa chỉ email" value={form.email} onChange={handleChange} required />
+                  </div>
+                </div>
+
+                <button disabled={loading} className="h-12 mt-2 w-full bg-secondary-container hover:bg-secondary text-on-primary rounded-lg font-headline-sm text-headline-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]" type="submit">
+                  <span>{loading ? 'Đang gửi...' : 'Gửi liên kết'}</span>
+                  {!loading && <span className="material-symbols-outlined">send</span>}
+                </button>
+                
+                <div className="text-center mt-4">
+                  <button type="button" onClick={() => setIsForgotPassword(false)} className="font-body-sm text-body-sm text-on-surface-variant hover:text-secondary-container transition-colors cursor-pointer inline-flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+                    Quay lại đăng nhập
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : isLogin ? (
             <div className="block animate-[fadeIn_0.3s]">
               <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
@@ -115,7 +164,7 @@ const Login = () => {
                 </div>
 
                 <div className="flex justify-end">
-                  <span className="font-body-sm text-body-sm text-on-surface-variant hover:text-secondary-container transition-colors cursor-pointer">Quên mật khẩu?</span>
+                  <span onClick={() => setIsForgotPassword(true)} className="font-body-sm text-body-sm text-on-surface-variant hover:text-secondary-container transition-colors cursor-pointer">Quên mật khẩu?</span>
                 </div>
 
                 <button disabled={loading} className="h-12 mt-2 w-full bg-secondary-container hover:bg-secondary text-on-primary rounded-lg font-headline-sm text-headline-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]" type="submit">

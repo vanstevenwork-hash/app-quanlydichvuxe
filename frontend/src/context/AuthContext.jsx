@@ -43,6 +43,16 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
+  const forgotPassword = async (email) => {
+    const res = await authAPI.forgotPassword({ email });
+    return res.data;
+  };
+
+  const resetPassword = async (token, password) => {
+    const res = await authAPI.resetPassword(token, { password });
+    return res.data;
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -50,7 +60,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, forgotPassword, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );

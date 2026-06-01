@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+const crypto = require('crypto');
 const User = require('../models/User');
+const sendEmail = require('../utils/sendEmail');
 
 // ============================================
 // ĐĂNG KÝ TÀI KHOẢN
@@ -131,6 +133,82 @@ exports.changePassword = async (req, res) => {
     await user.save();
 
     res.json({ message: 'Đổi mật khẩu thành công' });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+// ============================================
+// QUÊN MẬT KHẨU (Gửi email)
+// POST /api/auth/forgot-password
+// ============================================
+exports.forgotPassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy người dùng với email này' });
+    }
+
+    // Tạo reset token
+    const resetToken = user.getResetPasswordToken();
+
+    // Lưu lại db (tắt validation cho password)
+    await user.save({ validateBeforeSave: false });
+
+    // Tạo URL reset pass cho frontend
+    // Thường frontend sẽ chạy ở cổng 5173 hoặc process.env.FRONTEND_URL
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+    const message = `Bạn nhận được email này vì bạn (hoặc ai đó) đã yêu cầu đặt lại mật khẩu.\n\nVui lòng click vào đường dẫn sau để đặt lại mật khẩu (có hiệu lực trong 15 phút):\n\n${resetUrl}`;
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'AutoFix - Đặt lại mật khẩu',
+        message
+      });
+
+      res.status(200).json({ message: 'Email đã được gửi' });
+    } catch (err) {
+      console.log(err);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return res.status(500).json({ message: 'Không thể gửi email' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+// ============================================
+// ĐẶT LẠI MẬT KHẨU
+// PUT /api/auth/reset-password/:token
+// ============================================
+exports.resetPassword = async (req, res) => {
+  try {
+    // Mã hóa token gửi lên từ params để so sánh với token trong db
+    const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
+    }
+
+    // Set mật khẩu mới
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.' });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }

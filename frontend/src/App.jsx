@@ -14,6 +14,7 @@ import Services from './pages/Services/Services';
 import Booking from './pages/Booking/Booking';
 import Profile from './pages/Profile/Profile';
 import Login from './pages/Login/Login';
+import ResetPassword from './pages/Login/ResetPassword';
 import Contact from './pages/Contact/Contact';
 import Diagnostics from './pages/Diagnostics/Diagnostics';
 import MockGateway from './pages/Payment/MockGateway';
@@ -78,6 +79,7 @@ function App() {
 
           {/* ====== AUTH ROUTES ====== */}
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
       </Router>
       <ToastContainer position="top-right" autoClose={3000} />

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -55,59 +56,66 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
 
             {/* Large Card - Bento Layout */}
-            <div className="md:col-span-2 md:row-span-2 bg-surface-container-lowest rounded-xl p-8 border border-surface-container-highest shadow-sm card-hover flex flex-col justify-between relative overflow-hidden group animate-slide-up">
+            <div className="md:col-span-2 md:row-span-2 rounded-xl p-8 border border-surface-container-highest shadow-sm card-hover flex flex-col justify-between relative overflow-hidden group animate-slide-up">
+              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&q=80&w=800')" }}></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20"></div>
+              
               <div className="relative z-10 space-y-4">
-                <div className="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center text-on-primary shadow-sm group-hover:scale-105 transition-transform duration-300">
-                  <span className="material-symbols-outlined text-secondary-container text-2xl">car_repair</span>
+                <div className="w-12 h-12 bg-primary/80 backdrop-blur-sm rounded-full flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform duration-300">
+                  <span className="material-symbols-outlined text-white text-2xl">car_repair</span>
                 </div>
-                <h3 className="font-headline-md text-headline-md text-primary font-bold">Bảo Dưỡng Tổng Thể</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant max-w-md">Gói bảo dưỡng cao cấp giúp xe luôn trong tình trạng hoàn hảo. Kiểm tra hơn 50 hạng mục an toàn và hiệu suất.</p>
+                <h3 className="font-headline-md text-headline-md text-white font-bold drop-shadow-md">Bảo Dưỡng Tổng Thể</h3>
+                <p className="font-body-md text-body-md text-gray-200 max-w-md drop-shadow">Gói bảo dưỡng cao cấp giúp xe luôn trong tình trạng hoàn hảo. Kiểm tra hơn 50 hạng mục an toàn và hiệu suất.</p>
               </div>
-              <button onClick={() => navigate('/services')} className="relative z-10 w-fit font-label-md text-label-md text-secondary border border-secondary rounded-full px-5 py-2.5 hover:bg-secondary hover:text-white transition-all duration-300 mt-auto font-bold">Xem chi tiết</button>
-              {/* Abstract Background Graphic */}
-              <div className="absolute right-0 bottom-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none transform translate-y-12 translate-x-12">
-                <span className="material-symbols-outlined" style={{ fontSize: '260px', lineHeight: 1 }}>car_repair</span>
-              </div>
+              <button onClick={() => navigate('/services')} className="relative z-10 w-fit font-label-md text-label-md text-white border border-white/50 backdrop-blur-md rounded-full px-5 py-2.5 hover:bg-white hover:text-black transition-all duration-300 mt-auto font-bold shadow-lg">Xem chi tiết</button>
             </div>
 
             {/* Small Cards */}
-            <div onClick={() => navigate('/services')} className="bg-surface-container-lowest rounded-xl p-6 border border-surface-container-highest shadow-sm card-hover flex flex-col justify-between cursor-pointer animate-slide-up delay-1 group">
-              <div className="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center text-secondary group-hover:scale-105 transition-transform duration-300">
+            <div onClick={() => navigate('/services')} className="rounded-xl p-6 border border-surface-container-highest shadow-sm card-hover flex flex-col justify-between cursor-pointer animate-slide-up delay-1 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&q=80&w=400')" }}></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/30"></div>
+              <div className="relative z-10 w-10 h-10 bg-surface/20 backdrop-blur-md rounded-full flex items-center justify-center text-white mb-8 group-hover:scale-105 transition-transform duration-300">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>oil_barrel</span>
               </div>
-              <div>
-                <h3 className="font-headline-sm text-headline-sm text-primary mb-2 font-bold">Thay Nhớt & Bộ Lọc</h3>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">Sử dụng dầu nhớt chính hãng, kéo dài tuổi thọ động cơ.</p>
+              <div className="relative z-10">
+                <h3 className="font-headline-sm text-headline-sm text-white mb-2 font-bold drop-shadow-md">Thay Nhớt & Bộ Lọc</h3>
+                <p className="font-body-sm text-body-sm text-gray-300 drop-shadow">Sử dụng dầu nhớt chính hãng, kéo dài tuổi thọ động cơ.</p>
               </div>
             </div>
 
-            <div onClick={() => navigate('/services')} className="bg-surface-container-lowest rounded-xl p-6 border border-surface-container-highest shadow-sm card-hover flex flex-col justify-between cursor-pointer animate-slide-up delay-2 group">
-              <div className="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center text-secondary group-hover:scale-105 transition-transform duration-300">
+            <div onClick={() => navigate('/services')} className="rounded-xl p-6 border border-surface-container-highest shadow-sm card-hover flex flex-col justify-between cursor-pointer animate-slide-up delay-2 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=400')" }}></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/30"></div>
+              <div className="relative z-10 w-10 h-10 bg-surface/20 backdrop-blur-md rounded-full flex items-center justify-center text-white mb-8 group-hover:scale-105 transition-transform duration-300">
                 <span className="material-symbols-outlined">settings_suggest</span>
               </div>
-              <div>
-                <h3 className="font-headline-sm text-headline-sm text-primary mb-2 font-bold">Sửa Chữa Động Cơ</h3>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">Chẩn đoán chính xác, khắc phục triệt để các lỗi phức tạp.</p>
+              <div className="relative z-10">
+                <h3 className="font-headline-sm text-headline-sm text-white mb-2 font-bold drop-shadow-md">Sửa Chữa Động Cơ</h3>
+                <p className="font-body-sm text-body-sm text-gray-300 drop-shadow">Chẩn đoán chính xác, khắc phục triệt để các lỗi phức tạp.</p>
               </div>
             </div>
 
-            <div onClick={() => navigate('/services')} className="bg-surface-container-lowest rounded-xl p-6 border border-surface-container-highest shadow-sm card-hover flex flex-col justify-between cursor-pointer animate-slide-up delay-3 group">
-              <div className="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center text-secondary group-hover:scale-105 transition-transform duration-300">
+            <div onClick={() => navigate('/services')} className="rounded-xl p-6 border border-surface-container-highest shadow-sm card-hover flex flex-col justify-between cursor-pointer animate-slide-up delay-3 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=400')" }}></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/30"></div>
+              <div className="relative z-10 w-10 h-10 bg-surface/20 backdrop-blur-md rounded-full flex items-center justify-center text-white mb-8 group-hover:scale-105 transition-transform duration-300">
                 <span className="material-symbols-outlined">ac_unit</span>
               </div>
-              <div>
-                <h3 className="font-headline-sm text-headline-sm text-primary mb-2 font-bold">Điện & Điều Hòa</h3>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">Xử lý hệ thống điện thông minh và nạp gas điều hòa.</p>
+              <div className="relative z-10">
+                <h3 className="font-headline-sm text-headline-sm text-white mb-2 font-bold drop-shadow-md">Điện & Điều Hòa</h3>
+                <p className="font-body-sm text-body-sm text-gray-300 drop-shadow">Xử lý hệ thống điện thông minh và nạp gas điều hòa.</p>
               </div>
             </div>
 
-            <div onClick={() => navigate('/services')} className="bg-surface-container-lowest rounded-xl p-6 border border-surface-container-highest shadow-sm card-hover flex flex-col justify-between cursor-pointer animate-slide-up delay-4 group">
-              <div className="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center text-secondary group-hover:scale-105 transition-transform duration-300">
+            <div onClick={() => navigate('/services')} className="rounded-xl p-6 border border-surface-container-highest shadow-sm card-hover flex flex-col justify-between cursor-pointer animate-slide-up delay-4 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&q=80&w=400')" }}></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/30"></div>
+              <div className="relative z-10 w-10 h-10 bg-surface/20 backdrop-blur-md rounded-full flex items-center justify-center text-white mb-8 group-hover:scale-105 transition-transform duration-300">
                 <span className="material-symbols-outlined">local_car_wash</span>
               </div>
-              <div>
-                <h3 className="font-headline-sm text-headline-sm text-primary mb-2 font-bold">Chăm Sóc & Detailing</h3>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">Làm sạch sâu, phủ ceramic bảo vệ sơn xe toàn diện.</p>
+              <div className="relative z-10">
+                <h3 className="font-headline-sm text-headline-sm text-white mb-2 font-bold drop-shadow-md">Chăm Sóc & Detailing</h3>
+                <p className="font-body-sm text-body-sm text-gray-300 drop-shadow">Làm sạch sâu, phủ ceramic bảo vệ sơn xe toàn diện.</p>
               </div>
             </div>
           </div>
@@ -153,60 +161,99 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface">
-        <div className="max-w-container-max mx-auto text-center">
-          <h2 className="font-headline-lg text-headline-lg text-primary mb-12 font-bold animate-slide-up">Khách Hàng Nói Gì Về Chúng Tôi</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-            {/* Testimonial 1 */}
-            <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container-highest shadow-sm hover:shadow-md transition-shadow duration-300 animate-slide-up">
-              <div className="flex items-center gap-1 text-secondary-container mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="material-symbols-outlined text-secondary-container text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                ))}
-              </div>
-              <p className="font-body-md text-body-md text-on-surface-variant mb-6 leading-relaxed">"Dịch vụ rất chuyên nghiệp. Các bạn kỹ thuật viên giải thích rõ ràng tình trạng xe trước khi làm. Phòng chờ siêu xịn."</p>
-              <div className="flex items-center gap-3 border-t border-outline-variant/10 pt-4">
-                <div className="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center font-bold text-primary">A</div>
-                <div>
-                  <div className="font-label-md text-label-md text-primary font-bold">Anh Tuấn</div>
-                  <div className="font-body-sm text-body-sm text-on-surface-variant">VinFast Lux SA2.0</div>
+      {/* Testimonials - Infinite Marquee */}
+      <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface overflow-hidden">
+        <div className="text-center mb-16">
+          <h2 className="font-headline-lg text-headline-lg text-primary font-bold animate-slide-up">Khách Hàng Nói Gì Về Chúng Tôi</h2>
+          <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl mx-auto mt-4 animate-slide-up delay-1">Hàng nghìn khách hàng đã trải nghiệm và hài lòng với dịch vụ tại AutoFix.</p>
+        </div>
+        
+        <div className="testimonial-marquee-wrapper animate-fade-in delay-2">
+          <div className="testimonial-marquee">
+            {/* Duplicated Testimonials to create infinite scroll effect */}
+            {[...Array(2)].map((_, groupIndex) => (
+              <div key={groupIndex} className="flex gap-[24px]">
+                {/* Testimonial 1 */}
+                <div className="testimonial-card bg-surface-container-lowest p-8 rounded-2xl border border-surface-container-highest shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer group">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className="material-symbols-outlined text-[#F59E0B] text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                      ))}
+                    </div>
+                    <span className="material-symbols-outlined text-outline-variant/30 text-[40px] rotate-180 group-hover:text-primary/20 transition-colors">format_quote</span>
+                  </div>
+                  <p className="font-body-md text-body-md text-on-surface-variant mb-8 leading-relaxed line-clamp-4">"Dịch vụ rất chuyên nghiệp. Các bạn kỹ thuật viên giải thích rõ ràng tình trạng xe trước khi làm. Phòng chờ siêu xịn, có cafe và wifi cực mạnh. Sẽ ủng hộ lâu dài."</p>
+                  <div className="flex items-center gap-4 mt-auto">
+                    <img src="https://ui-avatars.com/api/?name=Anh+Tuan&background=0D8ABC&color=fff" alt="Anh Tuấn" className="w-12 h-12 rounded-full shadow-sm" />
+                    <div>
+                      <div className="font-label-md text-label-md text-primary font-bold">Anh Tuấn</div>
+                      <div className="font-body-sm text-body-sm text-on-surface-variant">VinFast Lux SA2.0</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial 2 */}
+                <div className="testimonial-card bg-surface-container-lowest p-8 rounded-2xl border border-surface-container-highest shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer group">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className="material-symbols-outlined text-[#F59E0B] text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                      ))}
+                    </div>
+                    <span className="material-symbols-outlined text-outline-variant/30 text-[40px] rotate-180 group-hover:text-primary/20 transition-colors">format_quote</span>
+                  </div>
+                  <p className="font-body-md text-body-md text-on-surface-variant mb-8 leading-relaxed line-clamp-4">"Mình mang xe qua sửa điều hòa, làm rất nhanh và mát sâu. Giá cả minh bạch, không phát sinh linh tinh. Kỹ thuật viên rất nhiệt tình hướng dẫn cách bảo quản xe."</p>
+                  <div className="flex items-center gap-4 mt-auto">
+                    <img src="https://ui-avatars.com/api/?name=Chi+Mai&background=10B981&color=fff" alt="Chị Mai" className="w-12 h-12 rounded-full shadow-sm" />
+                    <div>
+                      <div className="font-label-md text-label-md text-primary font-bold">Chị Mai</div>
+                      <div className="font-body-sm text-body-sm text-on-surface-variant">Mazda CX-5</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial 3 */}
+                <div className="testimonial-card bg-surface-container-lowest p-8 rounded-2xl border border-surface-container-highest shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer group">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className="material-symbols-outlined text-[#F59E0B] text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                      ))}
+                    </div>
+                    <span className="material-symbols-outlined text-outline-variant/30 text-[40px] rotate-180 group-hover:text-primary/20 transition-colors">format_quote</span>
+                  </div>
+                  <p className="font-body-md text-body-md text-on-surface-variant mb-8 leading-relaxed line-clamp-4">"Chỗ bảo dưỡng ruột của tôi mấy năm nay. Luôn yên tâm giao xe. Kỹ thuật cứng, đồ đạc xịn sò chính hãng. Quan trọng nhất là chữ tín luôn được đặt lên hàng đầu."</p>
+                  <div className="flex items-center gap-4 mt-auto">
+                    <img src="https://ui-avatars.com/api/?name=Chu+Hai&background=F59E0B&color=fff" alt="Chú Hải" className="w-12 h-12 rounded-full shadow-sm" />
+                    <div>
+                      <div className="font-label-md text-label-md text-primary font-bold">Chú Hải</div>
+                      <div className="font-body-sm text-body-sm text-on-surface-variant">Toyota Camry</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial 4 */}
+                <div className="testimonial-card bg-surface-container-lowest p-8 rounded-2xl border border-surface-container-highest shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer group">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className="material-symbols-outlined text-[#F59E0B] text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                      ))}
+                    </div>
+                    <span className="material-symbols-outlined text-outline-variant/30 text-[40px] rotate-180 group-hover:text-primary/20 transition-colors">format_quote</span>
+                  </div>
+                  <p className="font-body-md text-body-md text-on-surface-variant mb-8 leading-relaxed line-clamp-4">"Gói dọn nội thất và đánh bóng ở đây cực kỳ đỉnh. Lấy xe về mà tưởng như mới mua từ showroom. Cảm ơn AutoFix rất nhiều vì sự tỉ mỉ."</p>
+                  <div className="flex items-center gap-4 mt-auto">
+                    <img src="https://ui-avatars.com/api/?name=Thanh+Dat&background=8B5CF6&color=fff" alt="Thành Đạt" className="w-12 h-12 rounded-full shadow-sm" />
+                    <div>
+                      <div className="font-label-md text-label-md text-primary font-bold">Thành Đạt</div>
+                      <div className="font-body-sm text-body-sm text-on-surface-variant">Honda Civic</div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            {/* Testimonial 2 */}
-            <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container-highest shadow-sm hover:shadow-md transition-shadow duration-300 animate-slide-up delay-1">
-              <div className="flex items-center gap-1 text-secondary-container mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="material-symbols-outlined text-secondary-container text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                ))}
-              </div>
-              <p className="font-body-md text-body-md text-on-surface-variant mb-6 leading-relaxed">"Mình mang xe qua sửa điều hòa, làm rất nhanh và mát sâu. Giá cả minh bạch, không phát sinh linh tinh. Sẽ quay lại."</p>
-              <div className="flex items-center gap-3 border-t border-outline-variant/10 pt-4">
-                <div className="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center font-bold text-primary">M</div>
-                <div>
-                  <div className="font-label-md text-label-md text-primary font-bold">Chị Mai</div>
-                  <div className="font-body-sm text-body-sm text-on-surface-variant">Mazda CX-5</div>
-                </div>
-              </div>
-            </div>
-            {/* Testimonial 3 */}
-            <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container-highest shadow-sm hover:shadow-md transition-shadow duration-300 animate-slide-up delay-2">
-              <div className="flex items-center gap-1 text-secondary-container mb-4">
-                {[...Array(4)].map((_, i) => (
-                  <span key={i} className="material-symbols-outlined text-secondary-container text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                ))}
-                <span className="material-symbols-outlined text-[20px] text-secondary-container">star_half</span>
-              </div>
-              <p className="font-body-md text-body-md text-on-surface-variant mb-6 leading-relaxed">"Chỗ bảo dưỡng ruột của tôi mấy năm nay. Luôn yên tâm giao xe. Kỹ thuật cứng, đồ đạc xịn sò."</p>
-              <div className="flex items-center gap-3 border-t border-outline-variant/10 pt-4">
-                <div className="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center font-bold text-primary">H</div>
-                <div>
-                  <div className="font-label-md text-label-md text-primary font-bold">Chú Hải</div>
-                  <div className="font-body-sm text-body-sm text-on-surface-variant">Toyota Camry</div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>

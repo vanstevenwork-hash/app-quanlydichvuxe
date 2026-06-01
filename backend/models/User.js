@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 // Schema người dùng - dùng chung cho customer, technician, admin
 const userSchema = new mongoose.Schema({
@@ -48,7 +49,9 @@ const userSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  }
+  },
+  resetPasswordToken: String,
+  resetPasswordExpire: Date
 }, {
   timestamps: true // Tự động thêm createdAt, updatedAt
 });
@@ -64,6 +67,20 @@ userSchema.pre('save', async function(next) {
 // So sánh mật khẩu khi đăng nhập
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Tạo token reset mật khẩu
+userSchema.methods.getResetPasswordToken = function() {
+  // Tạo token ngẫu nhiên
+  const resetToken = crypto.randomBytes(20).toString('hex');
+
+  // Mã hóa token và lưu vào db
+  this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+  // Đặt thời gian hết hạn (15 phút)
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+  return resetToken;
 };
 
 module.exports = mongoose.model('User', userSchema);
